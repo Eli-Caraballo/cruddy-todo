@@ -8,9 +8,16 @@ var items = {};
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, { id, text });
+  counter.getNextUniqueId((err, num) => {
+    fs.writeFile(path.join(exports.dataDir, `${num}.txt`), text, (err) => {
+      if (err) {
+        console.log ('err: ' + err);
+      } else {
+        console.log ('not error?');
+        callback(null, { id: num, text: text });
+      }
+    });
+  });
 };
 
 exports.readAll = (callback) => {
@@ -43,7 +50,6 @@ exports.delete = (id, callback) => {
   var item = items[id];
   delete items[id];
   if (!item) {
-    // report an error if item not found
     callback(new Error(`No item with id: ${id}`));
   } else {
     callback();
