@@ -13,7 +13,7 @@ exports.create = (text, callback) => {
       if (err) {
         console.log ('err: ' + err);
       } else {
-        console.log ('not error?');
+        // console.log ('not error?');
         callback(null, { id: num, text: text });
       }
     });
@@ -21,19 +21,51 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+  //get a list of files
+
+  fs.readdir(exports.dataDir, (err, data) => {
+    console.log ('files next:');
+    console.log (data);
+    if (err) {
+      console.log ('error in readAll: ' + err);
+    } else {
+      callback(null, data.map((file) => {
+        //call readOne on each of the files
+        var id = file.substring(5, -1);
+        var text = exports.readOne(id, (err, data) => data[text]);
+        return {id: id, text: text};
+        // var text;
+        // fs.readdir(path.join(exports.dataDir, file), (err, data) => {
+        //   text = data;
+        // });
+      }));
+    }
   });
-  callback(null, data);
+//Expected: [{ id: '00001', text: 'todo 1' }, { id: '00002', text: 'todo 2' }]
+  // var data = _.map(items, (text, id) => {
+  //   return { id, text };
+  // });
+  // callback(null, data);
 };
 
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  fs.readFile(path.join(exports.dataDir, `${id}.txt`), (err, text) => {
+    if (err) {
+      console.log ('readOne error: ' + err);
+      callback(err, text);
+    } else {
+      console.log(text.toString());
+      callback(null, {id, text: text.toString()});
+    }
+  });
+
+
+  // var text = items[id];
+  // if (!text) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback(null, { id, text });
+  // }
 };
 
 exports.update = (id, text, callback) => {
