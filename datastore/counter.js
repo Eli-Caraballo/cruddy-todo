@@ -43,6 +43,7 @@ exports.getNextUniqueId = (callback) => {
     //if err
     if (err) {
       console.log ('unique error');
+      callback(err);
     }else{
       writeCounter(id + 1, callback);
     }
